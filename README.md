@@ -25,22 +25,18 @@ Junkcoin Client v2.0.0
 
 Junkcoin - a fork of Litecoin version with random bonus blocks. Like Litecoin it uses scrypt as a proof of work scheme.
 
-- 1 min block target
-- Difficulty retargets every 20 min with accelerated diff adjustment in the beginning
-- Initially 88 coins per block, halves every 2 months (100,000 blocks)
-- Total around 20 millions coins
-- connection port is 9917, RPC-port 9918
-
-Random Super-blocks:
-For the 1st 50000 blocks (1st month)
-- 5% chances 188 coins/block
-- 1% chances 588 coins/block
-- 0.01% chances 5888 coins/block (so expect 5 such blocks)
-
-    After 50000 blocks
-    - 5% chances 2 times the normal coins (i.e. if normal is 88 coins, you get 176 coins)
-    - 1% chances 5 times the normal coins
-    - 0.01% chance 58 times the normal coins
+- Total coins will be around 54 millions
+- Mining will be shut down after 12 years.
+- 1 minutes block target
+- Difficulty retargets once per day
+- To encorage early adoption the coins per block is high for the first 4 days:
+	- 1st day: 500 coins per block
+	- 2nd day: 200 coins per block
+	- 3rd/4th days: 100 coins per block
+- Starting 5th day, it will be 50 coins per block, will be halved every two years (or 518400 blocks).
+- In regular mining (after first 4 bonus days), there will be 1% chance a block will yield triple of the normal coins (e.g. in the first 2 years there's 1% chance you get 150 coins per block).
+- There is also 1/10,000 (0.01%) chance that a block will yield 1000 coins. This is valid for all 12 years of the mining.
+- The default ports are 9771(connect) and 9772(json rpc).
 
 
 Official Junkcoin Website and Community Forum
