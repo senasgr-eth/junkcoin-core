@@ -132,9 +132,11 @@ public:
 
         // AuxPoW parameters
         consensus.nAuxpowChainId = 0x2020;
-        consensus.fStrictChainId = false;  // we set this to false as block is nonAuxPow
+        consensus.fStrictChainId = true;  //changed to true
+        consensus.nBlockAfterAuxpowRewardThreshold = 5;
+        consensus.nAuxpowStartHeight = 180000;
 
-        consensus.fAllowLegacyBlocks = true;
+        //consensus.fAllowLegacyBlocks = true;
 
         // We do not activate digishield in this consensus
         digishieldConsensus = consensus;
@@ -217,6 +219,7 @@ public:
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
                 (      0, uint256S("0xa2effa738145e377e08a61d76179c21703e13e48910b30a2a87f0dfe794b64c6"))
+                //add new checkpoint
         };
 
         chainTxData = ChainTxData{

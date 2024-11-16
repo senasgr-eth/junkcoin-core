@@ -82,14 +82,29 @@ struct Params {
 
     /** Auxpow parameters */
     int32_t nAuxpowChainId;
+    int nAuxpowStartHeight;
+    int nBlockAfterAuxpowRewardThreshold;
     bool fStrictChainId;
-    bool fAllowLegacyBlocks;
+    //bool fAllowLegacyBlocks;
+    int nLegacyBlocksBefore; // -1 for "always allow"
 
     /** Height-aware consensus parameters */
     uint32_t nHeightEffective; // When these parameters come into use
     struct Params *pLeft = nullptr;      // Left hand branch
     struct Params *pRight = nullptr;     // Right hand branch
     const Consensus::Params *GetConsensus(uint32_t nTargetHeight) const;
+
+        /**
+     * Check whether or not to allow legacy blocks at the given height.
+     * @param nHeight Height of the block to check.
+     * @return True if it is allowed to have a legacy version.
+     */
+    bool AllowLegacyBlocks(unsigned nHeight) const
+    {
+        if(nAuxpowStartHeight < 0) // To always allow legacy blocks, set nAuxpowStartHeight to -1
+            return true;
+        return static_cast<int> (nHeight) < nAuxpowStartHeight;
+    }
 };
 } // namespace Consensus
 

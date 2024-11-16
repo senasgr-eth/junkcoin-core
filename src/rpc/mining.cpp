@@ -992,10 +992,10 @@ void AuxMiningCheck()
     if(!g_connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
-    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !Params().MineBlocksOnDemand())
+    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0 && !Params().MineBlocksOnDemand())  // FIXME: Is it good? at L506 there is no `!Params().MineBlocksOnDemand()`
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "JunkCoin is not connected!");
 
-    if (IsInitialBlockDownload() && !Params().MineBlocksOnDemand())
+    if (IsInitialBlockDownload() && !Params().MineBlocksOnDemand()) // FIXME: Is it good? at L509 there is no `!Params().MineBlocksOnDemand()`
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD,
                            "JunkCoin is downloading blocks...");
 
@@ -1003,7 +1003,9 @@ void AuxMiningCheck()
        past the point of merge-mining start.  Check nevertheless.  */
     {
         LOCK(cs_main);
-        if (Params().GetConsensus(chainActive.Height() + 1).fAllowLegacyBlocks)
+        //if (Params().GetConsensus(chainActive.Height() + 1).fAllowLegacyBlocks)
+        const auto auxpowStart = Params().GetConsensus(chainActive.Height() + 1).nAuxpowStartHeight;
+        if (chainActive.Height() + 1 < auxpowStart)
             throw std::runtime_error("getauxblock method is not yet available");
     }
 }
