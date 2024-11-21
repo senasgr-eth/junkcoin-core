@@ -15,7 +15,7 @@ class AuxPOWTest (BitcoinTestFramework):
     REWARD = 500000 # reward per block
     CHAIN_ID = "62"
     DIGISHIELD_START = 10 # nHeight when digishield starts
-    AUXPOW_START = 20 # nHeight when auxpow starts
+    AUXPOW_START = 0 # nHeight when auxpow starts
     MATURITY_HEIGHT = 60 # number of blocks for mined transactions to mature
 
     def setup_chain(self):
@@ -35,7 +35,7 @@ class AuxPOWTest (BitcoinTestFramework):
         try:
             scrypt_auxpow.mineScryptAux(self.nodes[0], "00", True)
         except JSONRPCException as ex:
-            if ex.error['message'] == "getauxblock method is not yet available":
+            if ex.error['message'] == "getauxblock method will be available after block %d" % self.AUXPOW_START:
                 pass
             else:
                 raise ex
@@ -55,7 +55,7 @@ class AuxPOWTest (BitcoinTestFramework):
         try:
             scrypt_auxpow.mineScryptAux(self.nodes[0], "00", True)
         except JSONRPCException as ex:
-            if ex.error['message'] == "getauxblock method is not yet available":
+            if ex.error['message'] == "getauxblock method will be available after block %d" % self.AUXPOW_START:
                 pass
             else:
                 raise ex
