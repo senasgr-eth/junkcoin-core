@@ -312,13 +312,13 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1735084800;   // 2024-12-25 18:00:00
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000003e3c33bc605e5d"); // 4,303,965
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000"); // 4,303,965
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x9b7bce58999062b63bfb18586813c42491fa32f4591d8d3043cb4fa9e551541b"); // 10000
+        consensus.defaultAssumeValid = uint256S("0xa2effa738145e377e08a61d76179c21703e13e48910b30a2a87f0dfe794b64c6"); // 10000
 
         // AuxPoW parameters
-        consensus.nAuxpowChainId = 0x0062; // 98 - Josh Wise!
+        consensus.nAuxpowChainId =  0x2021; // 98 - Josh Wise!
         consensus.fStrictChainId = true;
         consensus.fAllowLegacyBlocks = true;
 
@@ -341,7 +341,7 @@ public:
         // Not implementing AuxPow hardfork yet
         auxpowConsensus = digishieldConsensus;
         auxpowConsensus.nHeightEffective = std::numeric_limits<uint32_t>::max();
-        auxpowConsensus.fAllowLegacyBlocks = true;
+        //auxpowConsensus.fAllowLegacyBlocks = true;
 
         // Assemble the binary search tree of consensus parameters
         pConsensusRoot = &digishieldConsensus;
@@ -353,14 +353,17 @@ public:
         pchMessageStart[2] = 0xb7;
         pchMessageStart[3] = 0xdc;
 
-        nDefaultPort = 19917;
+        nDefaultPort = 19771;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1369199888, 12097647, 0x1e0ffff0, 1, 88 * COIN);
+        genesis = CreateGenesisBlock(1367394064, 112158625, 0x1e0ffff0, 1, 50 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
         auxpowConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
+
+        assert(consensus.hashGenesisBlock == uint256S("0xa2effa738145e377e08a61d76179c21703e13e48910b30a2a87f0dfe794b64c6"));
+        assert(genesis.hashMerkleRoot == uint256S("0x3de124b0274307911fe12550e96bf76cb92c12835db6cb19f82658b8aca1dbc8"));
 
         //assert(consensus.hashGenesisBlock == uint256S("0x324635c8e36f663b0adb126a21ad0bd7fa43cc5c5f15aec992bf4dde650bc0ea"));
         //assert(genesis.hashMerkleRoot == uint256S("0x6f80efd038566e1e3eab3e1d38131604d06481e77f2462235c6a9a94b1f8abf9"));
@@ -369,9 +372,9 @@ public:
         //vSeeds.push_back(CDNSSeedData("belscan.io", "testnetseed.belscan.io", true));
         //vSeeds.push_back(CDNSSeedData("belscan.io", "testnetseeder.belscan.io", true));
 
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,47);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,16);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,5);
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,153);
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,150);
         base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x02)(0xfa)(0xca)(0xfd).convert_to_container<std::vector<unsigned char> >();
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x02)(0xfa)(0xc3)(0x98).convert_to_container<std::vector<unsigned char> >();
 
@@ -384,7 +387,7 @@ public:
 
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
-                        (      0, uint256S("0x324635c8e36f663b0adb126a21ad0bd7fa43cc5c5f15aec992bf4dde650bc0ea"))
+                        (      0, uint256S("0xa2effa738145e377e08a61d76179c21703e13e48910b30a2a87f0dfe794b64c6"))
         };
 
         chainTxData = ChainTxData{
@@ -471,9 +474,10 @@ public:
         consensus.defaultAssumeValid = uint256S("0x2c05ea6918e28ca2d216c6518940c8782c09bebfe705d792155465662e275351"); // 10000
 
         // AuxPoW parameters
-        consensus.nAuxpowChainId = 0x0062; // 98 - Josh Wise!
+        consensus.nAuxpowChainId = 0x2021; // 98 - Josh Wise!
+        consensus.nAuxpowStartHeight = 0; // -1 will always allow legacy blocks
+        consensus.nBlockAfterAuxpowRewardThreshold = 5;
         consensus.fStrictChainId = true;
-        consensus.fAllowLegacyBlocks = true;
 
         // We do not activate digishield in this consensus
         digishieldConsensus = consensus;
@@ -494,7 +498,7 @@ public:
         // Not implementing AuxPow hardfork yet
         auxpowConsensus = digishieldConsensus;
         auxpowConsensus.nHeightEffective = std::numeric_limits<uint32_t>::max();
-        auxpowConsensus.fAllowLegacyBlocks = false;
+        //auxpowConsensus.fAllowLegacyBlocks = false;
 
         // Assemble the binary search tree of consensus parameters
         pConsensusRoot = &digishieldConsensus;
@@ -506,14 +510,14 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0xc0;
-        pchMessageStart[1] = 0xc0;
-        pchMessageStart[2] = 0xc0;
-        pchMessageStart[3] = 0xc0;
-        nDefaultPort = 19917;
+        pchMessageStart[0] = 0xfc;
+        pchMessageStart[1] = 0xc1;
+        pchMessageStart[2] = 0xb7;
+        pchMessageStart[3] = 0xdc;
+        nDefaultPort = 19771;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1369199888, 12097647, 0x1e0ffff0, 1, 88 * COIN);
+        genesis = CreateGenesisBlock(1369199888, 12097647, 0x1e0ffff0, 1, 50 * COIN);
 
         consensus.hashGenesisBlock = genesis.GetHash();
         digishieldConsensus.hashGenesisBlock = consensus.hashGenesisBlock;
