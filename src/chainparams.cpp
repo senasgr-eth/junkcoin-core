@@ -157,7 +157,7 @@ public:
         // Not implementing AuxPow hardfork yet
         auxpowConsensus = digishieldConsensus;
         auxpowConsensus.nHeightEffective = std::numeric_limits<uint32_t>::max();
-        auxpowConsensus.fAllowLegacyBlocks = true;
+        //auxpowConsensus.fAllowLegacyBlocks = true;
 
         // Assemble the binary search tree of consensus parameters
         pConsensusRoot = &digishieldConsensus;
