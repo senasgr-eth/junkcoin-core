@@ -319,8 +319,10 @@ public:
 
         // AuxPoW parameters
         consensus.nAuxpowChainId =  0x2021; // 98 - Josh Wise!
+        //consensus.fAllowLegacyBlocks = true;
+        consensus.nAuxpowStartHeight = 0; // -1 will always allow legacy blocks
+        consensus.nBlockAfterAuxpowRewardThreshold = 5;
         consensus.fStrictChainId = true;
-        consensus.fAllowLegacyBlocks = true;
 
         // We do not activate digishield in this consensus
         digishieldConsensus = consensus;
