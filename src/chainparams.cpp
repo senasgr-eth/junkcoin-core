@@ -134,7 +134,7 @@ public:
         consensus.nAuxpowChainId = 0x2020;
         consensus.fStrictChainId = true;  //changed to true
         consensus.nBlockAfterAuxpowRewardThreshold = 5;
-        consensus.nAuxpowStartHeight = 180000;
+        consensus.nAuxpowStartHeight = 170000;
 
         //consensus.fAllowLegacyBlocks = true;
 
@@ -219,12 +219,25 @@ public:
         checkpointData = (CCheckpointData) {
                 boost::assign::map_list_of
                 (      0, uint256S("0xa2effa738145e377e08a61d76179c21703e13e48910b30a2a87f0dfe794b64c6"))
-                //add new checkpoint
+                (     1, uint256S("0xca55073a54775a1ef78294f53f38a3e02d0654d7417f3cbbe4d28d17d50e07d0"))
+                (    53, uint256S("0xb623a39a5a0534990a59916d5803fa2bd6a6d52d8e594546936a42a2cc9b0441"))
+                (   117, uint256S("0x6cab49bd69fcce2bb48793cc064bb49e75f068e7029b5173db83654fbcb5953d"))
+                (   200, uint256S("0x45257b0f2ee6d5c55ac16a76817d7151b776d6452ae6f21426eaa42345b831f8"))
+                (  6452, uint256S("0x506562c2172d9f10e86d2b467ed3bb7b9eba40148d18d1e660c1ff692604f3fc"))
+                ( 10978, uint256S("0x1c9f7f7a4702f8225df430b259ac58c387de99439be8a8789841a1c011ead7fc"))
+                ( 17954, uint256S("0x6036051659e92a17cb7488040e05a94483b7a7f88b184156c136d51ff0390a7d"))
+                ( 23978, uint256S("0x7924154aa896363ec9be3ca5f939602f72cf4a5396e6e1cd9139335dd1819487"))
+                ( 33212, uint256S("0x448040ac454da8654d9c58ad79386aa1a88fd113be0fcc5ca39ecd3eae8c8618"))
+                ( 45527, uint256S("0xf2420d964001d4d2c8bc0d9283f3f684d4d91a509a50985888458a68e08e1c82"))
+                ( 57484, uint256S("0xc3e95c6fb35f4b39006c89538415b4f50a253a3ac1cad0e583fb287f6bd91be1"))
+                ( 69240, uint256S("0xc34f5d113fe92f3206ef8855caf51cd6252286e3381b253bbc1237211198c22b"))
+                ( 73892, uint256S("0xd05129c2d9f3e99565bf84fbceabbc61728e4d644173e194823b639f7c406b04"))
+                ( 168312, uint256S("0xdeea2bcecb1146ae9cd74d67b29b4d0161e9bb63beb9022ca10f3625dda6c0e6"))
         };
 
         chainTxData = ChainTxData{
                 // Data as of block ed7d266dcbd8bb8af80f9ccb8deb3e18f9cc3f6972912680feeb37b090f8cee0 (height 4303965).
-                // Tx estimate based on average between 2021-07-01 (3793538) and 2022-07-01 (4288126)
+                // Tx estimate based on average between 2021-07-01 (3793538) and 2022-07-01 (4287924154aa896363ec9be3ca5f939602f72cf4a5396e6e1cd9139335dd18194878126)
                 0, // * UNIX timestamp of last checkpoint block
                 0,   // * total number of transactions between genesis and last checkpoint
                 //   (the tx=... number in the SetBestChain debug.log lines)

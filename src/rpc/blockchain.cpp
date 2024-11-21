@@ -866,7 +866,7 @@ UniValue getblockstats(const JSONRPCRequest& request) {
           throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("Target block height %d after current tip %d", height, current_tip));
       }
 
-      pindex = pindexBestHeader;
+      pindex = chainActive[height];
     } else {
       const uint256 hash(ParseHashV(request.params[0], "hash_or_height"));
       pindex = mapBlockIndex[hash];
