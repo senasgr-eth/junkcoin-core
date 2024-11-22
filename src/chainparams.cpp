@@ -134,7 +134,7 @@ public:
         consensus.nAuxpowChainId = 0x2020;
         consensus.fStrictChainId = true;  //changed to true
         consensus.nBlockAfterAuxpowRewardThreshold = 5;
-        consensus.nAuxpowStartHeight = 170000;
+        consensus.nAuxpowStartHeight = 173000;
 
         //consensus.fAllowLegacyBlocks = true;
 
