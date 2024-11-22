@@ -11,6 +11,7 @@
 #include "primitives/block.h"
 #include "uint256.h"
 #include "util.h"
+#include "timedata.h"
 
 // Validate block timestamps to prevent time manipulation
 bool ValidateBlockTime(const CBlockIndex* pindexLast, const CBlockHeader *pblock)
