@@ -13,10 +13,6 @@
 #include "util.h"
 #include "timedata.h"
 
-// Height at which new difficulty adjustment rules activate
-static const int NEW_RULES_ACTIVATION_HEIGHT = 175000; // About 2.5 days from current height
-static const int TRANSITION_WINDOW = 2000; // Gradual transition over 2000 blocks (~1.4 days)
-
 // Calculate transition factor (0.0 to 1.0) based on block height
 double GetTransitionFactor(int height) {
     if (height < NEW_RULES_ACTIVATION_HEIGHT)
