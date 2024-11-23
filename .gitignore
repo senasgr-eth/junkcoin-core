@@ -1,5 +1,5 @@
 *.tar.gz
-
+.aider*
 *.exe
 src/junkcoin
 src/junkcoind
