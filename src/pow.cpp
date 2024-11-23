@@ -13,6 +13,50 @@
 #include "util.h"
 #include "timedata.h"
 
+// Height at which new difficulty adjustment rules activate
+static const int NEW_RULES_ACTIVATION_HEIGHT = 175000; // About 2.5 days from current height
+static const int TRANSITION_WINDOW = 2000; // Gradual transition over 2000 blocks (~1.4 days)
+
+// Calculate transition factor (0.0 to 1.0) based on block height
+double GetTransitionFactor(int height) {
+    if (height < NEW_RULES_ACTIVATION_HEIGHT)
+        return 0.0;
+    if (height >= NEW_RULES_ACTIVATION_HEIGHT + TRANSITION_WINDOW)
+        return 1.0;
+    
+    return (double)(height - NEW_RULES_ACTIVATION_HEIGHT) / TRANSITION_WINDOW;
+}
+
+// Get difficulty adjustment limits based on height and transition factor
+void GetDifficultyLimits(int height, double transitionFactor, 
+                        int64_t& nMinTimespan, int64_t& nMaxTimespan,
+                        const Consensus::Params& params) {
+    
+    // Default/old limits
+    nMinTimespan = params.nPowTargetTimespan/4;
+    nMaxTimespan = params.nPowTargetTimespan*4;
+
+    if (height < NEW_RULES_ACTIVATION_HEIGHT)
+        return;
+
+    // Calculate target limits based on height
+    int64_t targetMin, targetMax;
+    if (height > NEW_RULES_ACTIVATION_HEIGHT + 10000) {
+        targetMin = params.nPowTargetTimespan/4;
+        targetMax = params.nPowTargetTimespan*4;
+    } else if (height > NEW_RULES_ACTIVATION_HEIGHT + 5000) {
+        targetMin = params.nPowTargetTimespan/8;
+        targetMax = params.nPowTargetTimespan*4;
+    } else {
+        targetMin = params.nPowTargetTimespan/16;
+        targetMax = params.nPowTargetTimespan*4;
+    }
+
+    // Interpolate between old and new limits
+    nMinTimespan = nMinTimespan + (targetMin - nMinTimespan) * transitionFactor;
+    nMaxTimespan = nMaxTimespan + (targetMax - nMaxTimespan) * transitionFactor;
+}
+
 // Validate block timestamps to prevent time manipulation
 bool ValidateBlockTime(const CBlockIndex* pindexLast, const CBlockHeader *pblock)
 {
@@ -43,8 +87,62 @@ bool AllowMinDifficultyForBlock(const CBlockIndex* pindexLast, const CBlockHeade
     }
 
     // Only allow min difficulty if block time is significantly delayed
-    // Using 6x target spacing   instead of just 2x
+    // Using 6x target spacing instead of just 2x
     return (pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 6);
+}
+
+// Check that on difficulty adjustments, the new difficulty does not increase
+// or decrease beyond the permitted limits
+bool PermittedDifficultyTransition(const Consensus::Params& params, int64_t height, uint32_t old_nbits, uint32_t new_nbits)
+{
+    if (params.fPowAllowMinDifficultyBlocks)
+        return true;
+
+    if (height % params.DifficultyAdjustmentInterval() == 0) {
+        double transitionFactor = GetTransitionFactor(height);
+        int64_t nMinTimespan, nMaxTimespan;
+        GetDifficultyLimits(height, transitionFactor, nMinTimespan, nMaxTimespan, params);
+
+        const arith_uint256 pow_limit = UintToArith256(params.powLimit);
+        arith_uint256 observed_new_target;
+        observed_new_target.SetCompact(new_nbits);
+
+        // Calculate the largest difficulty value possible
+        arith_uint256 largest_difficulty_target;
+        largest_difficulty_target.SetCompact(old_nbits);
+        largest_difficulty_target *= nMaxTimespan;
+        largest_difficulty_target /= params.nPowTargetTimespan;
+
+        if (largest_difficulty_target > pow_limit) {
+            largest_difficulty_target = pow_limit;
+        }
+
+        // Round and compare to observed value
+        arith_uint256 maximum_new_target;
+        maximum_new_target.SetCompact(largest_difficulty_target.GetCompact());
+        if (maximum_new_target < observed_new_target)
+            return false;
+
+        // Calculate the smallest difficulty value possible
+        arith_uint256 smallest_difficulty_target;
+        smallest_difficulty_target.SetCompact(old_nbits);
+        smallest_difficulty_target *= nMinTimespan;
+        smallest_difficulty_target /= params.nPowTargetTimespan;
+
+        if (smallest_difficulty_target > pow_limit) {
+            smallest_difficulty_target = pow_limit;
+        }
+
+        // Round and compare to observed value
+        arith_uint256 minimum_new_target;
+        minimum_new_target.SetCompact(smallest_difficulty_target.GetCompact());
+        if (minimum_new_target > observed_new_target)
+            return false;
+
+    } else if (old_nbits != new_nbits) {
+        return false;
+    }
+    return true;
 }
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
@@ -102,7 +200,14 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     const CBlockIndex* pindexFirst = pindexLast->GetAncestor(nHeightFirst);
     assert(pindexFirst);
 
-    return CalculateDogecoinNextWorkRequired(fNewDifficultyProtocol, nTargetTimespanCurrent, pindexLast, pindexFirst->GetBlockTime(), params);
+    unsigned int nBits = CalculateNextWorkRequired(pindexLast, pindexFirst->GetBlockTime(), params);
+    
+    // Validate difficulty transition
+    if (!PermittedDifficultyTransition(params, pindexLast->nHeight + 1, pindexLast->nBits, nBits)) {
+        return pindexLast->nBits; // Keep previous difficulty if transition is not permitted
+    }
+
+    return nBits;
 }
 
 unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nFirstBlockTime, const Consensus::Params& params)
@@ -110,22 +215,30 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
     if (params.fPowNoRetargeting)
         return pindexLast->nBits;
 
+    // Calculate transition factor for new rules
+    double transitionFactor = GetTransitionFactor(pindexLast->nHeight + 1);
+
+    // Get difficulty limits based on height and transition factor
+    int64_t nMinTimespan, nMaxTimespan;
+    GetDifficultyLimits(pindexLast->nHeight + 1, transitionFactor, nMinTimespan, nMaxTimespan, params);
+
     // Limit adjustment step
     int64_t nActualTimespan = pindexLast->GetBlockTime() - nFirstBlockTime;
+    int64_t nModulatedTimespan = nActualTimespan;
 
-    // Target timespan is 4 hours, limit adjustment to 1/4th and 4x
-    if (nActualTimespan < params.nPowTargetTimespan/4)
-        nActualTimespan = params.nPowTargetTimespan/4;
-    if (nActualTimespan > params.nPowTargetTimespan*4)
-        nActualTimespan = params.nPowTargetTimespan*4;
+    // Apply limits
+    if (nModulatedTimespan < nMinTimespan)
+        nModulatedTimespan = nMinTimespan;
+    else if (nModulatedTimespan > nMaxTimespan)
+        nModulatedTimespan = nMaxTimespan;
 
     // Retarget
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     arith_uint256 bnNew;
     bnNew.SetCompact(pindexLast->nBits);
 
-    // Use actual timespan to adjust difficulty
-    bnNew *= nActualTimespan;
+    // Use modulated timespan to adjust difficulty
+    bnNew *= nModulatedTimespan;
     bnNew /= params.nPowTargetTimespan;
 
     // Make sure we do not exceed the proof of work limit
